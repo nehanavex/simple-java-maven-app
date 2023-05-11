@@ -1,0 +1,36 @@
+name: test-workflow
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop 
+      
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set branch name as lab
+        if: ${{ github.ref_name=='develop' }}
+        run: |
+          echo ("BRANCH_NAME=" + "lab") >> $env:GITHUB_ENV
+          
+      - name: Set branch name as Stable
+        if: ${{ github.ref_name=='release' }}
+        run: |
+          chcp 65001 #set code page to utf-8
+          echo ("BRANCH_NAME=" + "Stable") >> $env:GITHUB_ENV
+
+      - name: Set branch name as Stable for master
+        if: ${{ github.ref_name=='master' }}
+        run: |
+          chcp 65001 #set code page to utf-8
+          echo ("BRANCH_NAME=" + "Stable") >> $env:GITHUB_ENV
+
+      - run: echo "${{ env.BRANCH_NAME }}"
+      - run: echo $env:BRANCH_NAME
+      - run: mvn clean install -DskipTests
+      - run: ls .\target\
